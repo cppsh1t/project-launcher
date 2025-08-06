@@ -1,12 +1,12 @@
 import { defineConfig } from "unocss";
-import presetUno from "@unocss/preset-uno";
+import presetWind3 from '@unocss/preset-wind3'
 import presetRemToPx from '@unocss/preset-rem-to-px'
 
 export default defineConfig({
   shortcuts: {
   },
   presets: [
-    presetUno(),
+    presetWind3,
     presetRemToPx()
   ],
   transformers: [
