@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus';
-import { addProject } from '../../utils/request';
+import { addProject, editProject } from '../../utils/request';
 import type { Project } from '../../utils/type'; // 假设类型文件路径正确
 import { eventBus } from '../../utils/event';
 
@@ -54,9 +54,14 @@ function close() {
 }
 
 async function handleAddData() {
-  await addProject(model.value)
+  if (model.value.id) {
+    await editProject(model.value)
+    ElMessage.success('编辑成功')
+  } else {
+    await addProject(model.value)
+    ElMessage.success('添加成功')
+  }
   eventBus.emit('refresh-page')
-  ElMessage.success('添加成功')
   close()
 }
 </script>
