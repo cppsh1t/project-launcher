@@ -7,7 +7,7 @@
           <div class="flex justify-between items-center">
             <span class="font-bold text-lg truncate">{{ project.name }}</span>
             
-            <el-dropdown @command="(cmd) => handleCommand(cmd, project)" @click.stop>
+            <el-dropdown @command="(cmd: string) => handleCommand(cmd, project)" @click.stop>
               <el-icon :size="20" class="cursor-pointer p-1 rounded-full" @click.stop>
                 <More />
               </el-icon>
