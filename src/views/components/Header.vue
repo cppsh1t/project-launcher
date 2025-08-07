@@ -2,7 +2,7 @@
   <div class="w-full h-full flex justify-between box-border p-5">
     <div class="flex gap-3">
       <el-input v-model="model.name" placeholder="项目名" />
-      <el-select v-model="model.tags" multiple allow-create placeholder="标签" class="w-64">
+      <el-select v-model="model.tags" multiple allow-create filterable default-first-option placeholder="标签">
       </el-select>
     </div>
     <div class="flex gap-3">

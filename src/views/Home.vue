@@ -44,7 +44,9 @@ const currentProjectData = ref<Project>({
 })
 
 async function initData() {
-  projectData.value = await getProjectPage(searchModel.value)
+  const {list, total} = await getProjectPage(searchModel.value)
+  projectData.value = list
+  searchModel.value.total = total
 }
 
 onBeforeMount(initData)

@@ -1,3 +1,9 @@
+export type ListData<T = any> = {
+  list: T[]
+  total: number
+}
+
+
 /**
  * @property location 项目地址
  * @property launcher 启动命令， 默认用 code location 启动

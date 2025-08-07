@@ -14,7 +14,7 @@
       </el-form-item>
 
       <el-form-item label="标签" prop="tags" class="mb-4">
-        <el-select v-model="model.tags" multiple allow-create placeholder="输入或选择标签后按回车" class="w-full" />
+        <el-select v-model="model.tags" multiple allow-create filterable default-first-option placeholder="输入或选择标签后按回车" class="w-full" />
       </el-form-item>
 
       <el-form-item label="启动命令" prop="launcher" class="mb-4">

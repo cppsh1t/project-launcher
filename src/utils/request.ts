@@ -1,9 +1,9 @@
-import type { Project, ProjectSearchForm } from "./type";
+import type { ListData, Project, ProjectSearchForm } from "./type";
 
-export async function getProjectPage(form: ProjectSearchForm): Promise<Project[]> {
+export async function getProjectPage(form: ProjectSearchForm): Promise<ListData<Project>> {
     // 实际应用中，这里会根据 form 中的分页和查询条件进行筛选
     // 此处仅为演示，返回所有伪造数据
-    return Promise.resolve([
+    const list = [
         {
             name: "后台管理系统",
             projectName: "admin-dashboard-vue3",
@@ -49,7 +49,11 @@ export async function getProjectPage(form: ProjectSearchForm): Promise<Project[]
             tags: ["jQuery", "HTML", "CSS", "Legacy"],
             desc: "公司旧版官方网站，目前仅做维护，不再开发新功能。"
         }
-    ])
+    ]
+    return Promise.resolve({
+        total: 10,
+        list
+    })
 }
 
 export async function addProject(form: Project) {
