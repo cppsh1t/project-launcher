@@ -40,8 +40,8 @@ const props = defineProps<{
 }>()
 
 
-function handleClick(item: Project) {
-  launchProject(item.id!)
+async function handleClick(item: Project) {
+  await launchProject(item.id!)
   ElMessage.info(`will launch ${item.name}`)
 }
 </script>

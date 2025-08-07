@@ -157,7 +157,7 @@ pub fn get_project_page(page: usize, size: usize, name: Option<String>, tags: Op
 
 // ... (keep all existing code: DB, structs, init_database, other commands) ...
 #[tauri::command]
-pub async fn launch_project(id: i64) -> Result<(), String> {
+pub async fn launch_project_old(id: i64) -> Result<(), String> {
     // 1. Fetch the project's launcher and location from the database
     let (launcher, location): (Option<String>, String) = {
         // Scoping the DB lock to release it as soon as the query is done
@@ -189,7 +189,48 @@ pub async fn launch_project(id: i64) -> Result<(), String> {
     Command::new(program)
         .args(args)
         .spawn()
-        .map_err(|e| format!("Failed to launch command '{}': {}", command_to_run, e))?;
+        .map_err(|e| format!("Failed to launch command {}, param: {}, error: {}", program, args.join(","), e))?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn launch_project(id: i64) -> Result<(), String> {
+    // 1. 从数据库获取项目的启动器和位置
+    let (launcher, location): (Option<String>, String) = {
+        let conn = DB.lock().unwrap();
+        conn.query_row(
+            "SELECT launcher, location FROM projects WHERE id = ?1",
+            params![id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+    }
+    .map_err(|e| match e {
+        rusqlite::Error::QueryReturnedNoRows => format!("ID 为 {} 的项目未找到。", id),
+        _ => e.to_string(),
+    })?;
+    // 2. 确定要执行的命令。如果 launcher 为空，则默认为 'code .'
+    // 'code .' 是一个很常见的默认行为，表示在 VS Code 中打开当前目录。
+    let command_to_run = launcher.filter(|s| !s.is_empty()).unwrap_or_else(|| "code .".to_string());
+    // 3. 根据操作系统创建对应的 shell 命令
+    let mut cmd = if cfg!(target_os = "windows") {
+        let mut c = Command::new("cmd");
+        c.args(["/C", &command_to_run]);
+        c
+    } else {
+        let mut c = Command::new("sh");
+        c.args(["-c", &command_to_run]);
+        c
+    };
+    // 4. 【关键】设置命令的执行目录为项目的 location
+    cmd.current_dir(&location);
+    // 5. 异步执行命令，不阻塞 UI 线程
+    cmd.spawn()
+        .map_err(|e| {
+            format!(
+                "在目录 '{}' 中启动命令 '{}' 失败: {}",
+                location, command_to_run, e
+            )
+        })?;
     Ok(())
 }
 
