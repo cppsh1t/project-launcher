@@ -18,7 +18,7 @@
       </el-form-item>
 
       <el-form-item label="启动命令" prop="launcher" class="mb-4">
-        <el-input v-model="model.launcher" placeholder="请输入地址" />
+        <el-input v-model="model.launcher" placeholder="请输入启动命令" />
       </el-form-item>
 
       <el-form-item label="描述" prop="desc">
