@@ -36,6 +36,7 @@
 import { ElMessage } from 'element-plus';
 import { addProject } from '../../utils/request';
 import type { Project } from '../../utils/type'; // 假设类型文件路径正确
+import { eventBus } from '../../utils/event';
 
 const model = defineModel<Project>({ required: true });
 
@@ -54,6 +55,7 @@ function close() {
 
 async function handleAddData() {
   await addProject(model.value)
+  eventBus.emit('refresh-page')
   ElMessage.success('添加成功')
   close()
 }

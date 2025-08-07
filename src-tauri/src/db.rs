@@ -1,9 +1,11 @@
 use once_cell::sync::Lazy;
 use rusqlite::{params, Connection, Result};
 use serde::{Deserialize, Serialize};
+use std::process::Command;
 use std::sync::Mutex;
 use tauri::AppHandle;
 use tauri::Manager; 
+
 
 // --- 全局数据库连接 ---
 // 使用 Lazy 和 Mutex 来创建一个线程安全的、全局唯一的数据库连接实例
@@ -152,3 +154,42 @@ pub fn get_project_page(page: usize, size: usize, name: Option<String>, tags: Op
     let list: Vec<Project> = project_iter.collect::<Result<Vec<Project>, _>>().map_err(|e| e.to_string())?;
     Ok(PaginatedProjects { list, total })
 }
+
+// ... (keep all existing code: DB, structs, init_database, other commands) ...
+#[tauri::command]
+pub async fn launch_project(id: i64) -> Result<(), String> {
+    // 1. Fetch the project's launcher and location from the database
+    let (launcher, location): (Option<String>, String) = {
+        // Scoping the DB lock to release it as soon as the query is done
+        let conn = DB.lock().unwrap();
+        conn.query_row(
+            "SELECT launcher, location FROM projects WHERE id = ?1",
+            params![id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+    }
+    .map_err(|e| match e {
+        rusqlite::Error::QueryReturnedNoRows => format!("Project with id {} not found.", id),
+        _ => e.to_string(),
+    })?;
+    // 2. Determine the command to run
+    let command_to_run = launcher
+        .filter(|s| !s.is_empty()) // Use launcher if it exists and is not empty
+        .unwrap_or_else(|| format!("code {}", location)); // Default to 'code [location]'
+    // 3. Parse the command string using shlex
+    let parts = shlex::split(&command_to_run)
+        .ok_or_else(|| format!("Invalid command format: {}", command_to_run))?;
+    if parts.is_empty() {
+        return Err("Cannot execute an empty command.".to_string());
+    }
+    let program = &parts[0];
+    let args = &parts[1..];
+    // 4. Spawn the command asynchronously
+    // This will not block the Tauri main thread or the UI
+    Command::new(program)
+        .args(args)
+        .spawn()
+        .map_err(|e| format!("Failed to launch command '{}': {}", command_to_run, e))?;
+    Ok(())
+}
+

@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-full box-border p-5">
     <div class="grid grid-cols-5 gap-7">
-      <el-card v-for="(project, index) in data" :key="index" shadow="hover"
+      <el-card v-for="(project, index) in data" :key="index" shadow="hover" @click="handleClick(project)"
         class="transition-all duration-300 ease-in-out hover:-translate-y-1">
         <template #header>
           <div class="flex justify-between items-center">
@@ -30,6 +30,8 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage } from 'element-plus';
+import { launchProject } from '../../utils/request';
 import type { Project } from '../../utils/type';
 
 
@@ -37,4 +39,9 @@ const props = defineProps<{
   data: Project[]
 }>()
 
+
+function handleClick(item: Project) {
+  launchProject(item.id!)
+  ElMessage.info(`will launch ${item.name}`)
+}
 </script>

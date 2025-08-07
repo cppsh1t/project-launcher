@@ -42,3 +42,7 @@ export async function deleteProject(id: number): Promise<void> {
     // 调用 Rust 后端命令 `delete_project`
     await invoke('delete_project', { id });
 }
+
+export async function launchProject(id: number) {
+    await invoke('launch_project', {id})
+}
